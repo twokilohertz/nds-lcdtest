@@ -41,6 +41,7 @@ BUILDDIR=build/
 OBJDIR=obj/
 SRCDIR=src/
 INCLDIR=include/
+RESDIR=res/
 
 # Includes and links
 INCLUDES:=-I$(LIBNDS)/include -I$(INCLDIR)
@@ -49,6 +50,7 @@ LINKS=-L$(LIBNDS)/lib -lnds9
 # Collection of files
 CFILES=$(wildcard $(SRCDIR)*.c)
 OFILES=$(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(CFILES))
+RESFILES=$(patsubst $(RESDIR)%.png, $(RESDIR)%.s, $(wildcard $(RESDIR)*.png))
 
 # Code generation options
 # vvv Allows ARM and Thumb instruction sets together (v5 TE architecture on the NDS) vvv
@@ -71,4 +73,9 @@ $(OBJDIR)%.o: $(SRCDIR)%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf build/* obj/*
+	rm -rf $(BUILDDIR)* $(OBJDIR)* $(RESDIR)*.s $(RESDIR)*.h
+
+grit: $(RESFILES)
+
+$(RESDIR)%.s: $(RESDIR)%.png
+	grit $< -gb -gB16 -fts -o$@
