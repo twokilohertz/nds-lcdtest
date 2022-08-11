@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "NDS",
+            "name": "NDS (Windows)",
             "includePath": [
                 "${workspaceFolder}/**",
                 "C:\\msys64\\opt\\devkitpro\\libnds\\include"
@@ -9,7 +9,8 @@
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "ARM9"
             ],
             "windowsSdkVersion": "",
             "compilerPath": "C:\\msys64\\opt\\devkitpro\\devkitARM\\bin\\arm-none-eabi-gcc.exe",
