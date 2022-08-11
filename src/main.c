@@ -9,7 +9,7 @@ int main(void)
 
     while (true)
     {
-        printf("hello");
+        printf("hello\n");
     }
 
     return 0;

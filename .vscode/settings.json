@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "nds.h": "c",
-        "platform.h": "c"
+        "platform.h": "c",
+        "stdio.h": "c"
     }
 }
