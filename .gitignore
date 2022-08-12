@@ -1,5 +1,11 @@
+# Ignore build artifacts
 build/
 obj/
 
+# Ignore converted resources
+include/res/
+src/res/
+
+# Ignore certain VSCode configs
 .vscode/*
 !.vscode/c_cpp_properties.json
