@@ -15,6 +15,7 @@ endif
 PREFIX=arm-none-eabi-
 CC:=$(PREFIX)gcc
 CXX:=$(PREFIX)g++
+AS:=$(PREFIX)as
 OBJCOPY:=$(PREFIX)objcopy
 STRIP:=$(PREFIX)strip
 
@@ -48,9 +49,11 @@ INCLUDES:=-I$(LIBNDS)/include -I$(INCLDIR)
 LINKS=-L$(LIBNDS)/lib -lnds9
 
 # Collection of files
-CFILES=$(wildcard $(SRCDIR)*.c)
-OFILES=$(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(CFILES))
-RESFILES=$(patsubst $(RESDIR)%.png, $(RESDIR)%.s, $(wildcard $(RESDIR)*.png))
+# $(wildcard $(SRCDIR)*.c) doesn't recurse
+CFILES=$(shell find $(SRCDIR) -type f -iname "*.c")
+RESFILES=$(shell find $(RESDIR) -type f -iname "*.png")
+ASMFILES=$(patsubst $(RESDIR)%.png, $(SRCDIR)res/%.s, $(RESFILES))
+OFILES=$(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(CFILES)) $(patsubst $(SRCDIR)res/%.s, $(OBJDIR)%.out, $(ASMFILES))
 
 # Code generation options
 # vvv Allows ARM and Thumb instruction sets together (v5 TE architecture on the NDS) vvv
@@ -58,24 +61,33 @@ ARMARCH=-mthumb -mthumb-interwork
 CFLAGS:=-Wall -O2 -march=armv5te -mtune=arm946e-s $(ARMARCH) $(INCLUDES)
 CXXFLAGS:=$(CFLAGS) -fno-rtti
 LDFLAGS:=-specs=ds_arm9.specs $(ARMARCH) $(LINKS)
+ASFLAGS:=-march=armv5te -mcpu=arm946e-s $(ARMARCH)
 
 # Make targets
 
 all: clean nds
 
-nds: $(TARGET)
-	ndstool -c $(BUILDDIR)$(TARGET).nds -9 $(BUILDDIR)$(TARGET).elf -b res/icon_256_colour.bmp "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)"
+# Build .nds file from ELF binary
+nds: link
+	ndstool -c $(BUILDDIR)$(TARGET).nds -9 $(BUILDDIR)$(TARGET).elf -b icon_256_colour.bmp "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)"
 
-$(TARGET): $(OFILES)
-	$(CC) $(LDFLAGS) $(OFILES) -o $(BUILDDIR)$@.elf
+# Linking
+link: $(OFILES)
+	$(CC) $(LDFLAGS) -o $(BUILDDIR)$(TARGET).elf $^
 
+# Compile
 $(OBJDIR)%.o: $(SRCDIR)%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Converting .png files to ASM with grit
+$(SRCDIR)res/%.s: $(RESDIR)%.png
+	grit $< -gb -gB16 -fts -o$(basename $@)
+	mv $(basename $@).h $(INCLDIR)res/
+
+# Assembling (works only for resources at the moment)
+$(OBJDIR)%.out: $(SRCDIR)res/%.s
+	$(AS) $(ASFLAGS) -o $@ $<
+
+# Cleanup build output
 clean:
-	rm -rf $(BUILDDIR)* $(OBJDIR)* $(RESDIR)*.s $(RESDIR)*.h
-
-grit: $(RESFILES)
-
-$(RESDIR)%.s: $(RESDIR)%.png
-	grit $< -gb -gB16 -fts -o$@
+	rm -rf $(BUILDDIR)* $(OBJDIR)*
