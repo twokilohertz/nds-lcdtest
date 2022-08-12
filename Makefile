@@ -46,7 +46,7 @@ RESDIR=res/
 
 # Includes and links
 INCLUDES:=-I$(LIBNDS)/include -I$(INCLDIR)
-LINKS=-L$(LIBNDS)/lib -lnds9
+LIBS=-L$(LIBNDS)/lib -lnds9
 
 # Collection of files
 # $(wildcard $(SRCDIR)*.c) doesn't recurse
@@ -60,7 +60,7 @@ OFILES=$(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(CFILES)) $(patsubst $(SRCDIR)res
 ARMARCH=-mthumb -mthumb-interwork
 CFLAGS:=-Wall -O2 -march=armv5te -mtune=arm946e-s $(ARMARCH) $(INCLUDES)
 CXXFLAGS:=$(CFLAGS) -fno-rtti
-LDFLAGS:=-specs=ds_arm9.specs $(ARMARCH) $(LINKS)
+LDFLAGS:=-specs=ds_arm9.specs $(ARMARCH)
 ASFLAGS:=-march=armv5te -mcpu=arm946e-s $(ARMARCH)
 
 # Make targets
@@ -73,7 +73,7 @@ nds: link
 
 # Linking
 link: $(OFILES)
-	$(CC) $(LDFLAGS) -o $(BUILDDIR)$(TARGET).elf $^
+	$(CC) $(LDFLAGS) -o $(BUILDDIR)$(TARGET).elf $^ $(LIBS)
 
 # Compile
 $(OBJDIR)%.o: $(SRCDIR)%.c
@@ -81,7 +81,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.c
 
 # Converting .png files to ASM with grit
 $(SRCDIR)res/%.s: $(RESDIR)%.png
-	grit $< -gb -gB16 -fts -o$(basename $@)
+	grit $< -gb -gB16 -fts -p -o$(basename $@)
 	mv $(basename $@).h $(INCLDIR)res/
 
 # Assembling (works only for resources at the moment)
