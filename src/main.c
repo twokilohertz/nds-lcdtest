@@ -1,8 +1,10 @@
 #include "platform.h"
 #include "init.h"
-#include "res/smpte_colour_bars.h"
+#include "patterns.h"
 
 #include <stdio.h>
+
+// Global state
 
 int main(void)
 {
@@ -23,15 +25,9 @@ int main(void)
     // Initialise background for displaying test patterns
     int PATTERN_BGID = bgInit(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
 
-    // Copy bitmap to video memory
-    dmaCopy((const void*)smpte_colour_barsBitmap,
-            bgGetGfxPtr(PATTERN_BGID),
-            smpte_colour_barsBitmapLen);
+    iprintf("Press A to cycle test patterns\nPress X to swap screens\nPress START to exit.");
 
-    iprintf("Copied %d bytes from 0x%x to 0x%x\n",
-            smpte_colour_barsBitmapLen,
-            smpte_colour_barsBitmap,
-            bgGetGfxPtr(PATTERN_BGID));
+    cycle_pattern(PATTERN_BGID); // Display first pattern (pattern 0 in patterns.c)
 
     while (true)
     {
@@ -39,6 +35,8 @@ int main(void)
 
         scanKeys();
         if (keysDown() & KEY_START) break;
+        if (keysDown() & KEY_X) swap_screens();
+        if (keysDown() & KEY_A) cycle_pattern(PATTERN_BGID);
     }
 
     return 0;

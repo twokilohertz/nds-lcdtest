@@ -58,7 +58,8 @@ OFILES=$(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(CFILES)) $(patsubst $(SRCDIR)res
 
 # Code generation options
 # vvv Allows ARM and Thumb instruction sets together (v5 TE architecture on the NDS) vvv
-ARMARCH=-mthumb -mthumb-interwork
+# 	(including -mthumb means only THUMB instructions seem to be generated)
+ARMARCH=-mthumb-interwork
 CFLAGS:=-Wall -O2 -march=armv5te -mtune=arm946e-s $(ARMARCH) $(DEFINES) $(INCLUDES)
 CXXFLAGS:=$(CFLAGS) -fno-rtti
 LDFLAGS:=-specs=ds_arm9.specs $(ARMARCH)
@@ -82,7 +83,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.c
 
 # Converting .png files to ASM with grit
 $(SRCDIR)res/%.s: $(RESDIR)%.png
-	grit $< -gb -gB16 -gT! -fts -fh -o$(basename $@)
+	grit $< -ff$(basename $<).grit -o$(basename $@)
 	mv $(basename $@).h $(INCLDIR)res/
 
 # Assembling (works only for resources at the moment)
