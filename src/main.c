@@ -10,19 +10,32 @@ int main(void)
     init();
 
     // Initialise console for printing text
-    PrintConsole console;
-    consoleInit(&console, 0, BgType_Text4bpp, BgSize_T_256x256, 0, 0, false, true);
+    PrintConsole* defConsole = consoleGetDefault();
+    PrintConsole* console = consoleInit(NULL,
+                                        0,
+                                        BgType_Text4bpp,
+                                        BgSize_T_256x256,
+                                        defConsole->mapBase,
+                                        defConsole->gfxBase,
+                                        false,
+                                        true);
 
     // Initialise background for displaying test patterns
-    int bg2_id = bgInit(2, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
+    int PATTERN_BGID = bgInit(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
 
-    dmaCopy((const void*)smpte_colour_barsBitmap, bgGetGfxPtr(bg2_id), 256*256);
+    // Copy bitmap to video memory
+    dmaCopy((const void*)smpte_colour_barsBitmap,
+            bgGetGfxPtr(PATTERN_BGID),
+            smpte_colour_barsBitmapLen);
+
+    iprintf("Copied %d bytes from 0x%x to 0x%x\n",
+            smpte_colour_barsBitmapLen,
+            smpte_colour_barsBitmap,
+            bgGetGfxPtr(PATTERN_BGID));
 
     while (true)
     {
         swiWaitForVBlank(); // Frame has been displayed, we can draw again :)
-
-        iprintf("Hello, World!\n");
 
         scanKeys();
         if (keysDown() & KEY_START) break;

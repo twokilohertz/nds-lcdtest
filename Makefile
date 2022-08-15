@@ -18,6 +18,7 @@ CXX:=$(PREFIX)g++
 AS:=$(PREFIX)as
 OBJCOPY:=$(PREFIX)objcopy
 STRIP:=$(PREFIX)strip
+DEFINES=-DARM9
 
 # NDS game file metadata
 GAME_TITLE=lcdtest
@@ -58,7 +59,7 @@ OFILES=$(patsubst $(SRCDIR)%.c, $(OBJDIR)%.o, $(CFILES)) $(patsubst $(SRCDIR)res
 # Code generation options
 # vvv Allows ARM and Thumb instruction sets together (v5 TE architecture on the NDS) vvv
 ARMARCH=-mthumb -mthumb-interwork
-CFLAGS:=-Wall -O2 -march=armv5te -mtune=arm946e-s $(ARMARCH) $(INCLUDES)
+CFLAGS:=-Wall -O2 -march=armv5te -mtune=arm946e-s $(ARMARCH) $(DEFINES) $(INCLUDES)
 CXXFLAGS:=$(CFLAGS) -fno-rtti
 LDFLAGS:=-specs=ds_arm9.specs $(ARMARCH)
 ASFLAGS:=-march=armv5te -mcpu=arm946e-s $(ARMARCH)
@@ -69,7 +70,7 @@ all: clean nds
 
 # Build .nds file from ELF binary
 nds: link
-	ndstool -c $(BUILDDIR)$(TARGET).nds -9 $(BUILDDIR)$(TARGET).elf -b icon_256_colour.bmp "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)"
+	ndstool -c $(BUILDDIR)$(TARGET).nds -9 $(BUILDDIR)$(TARGET).elf -b icon.bmp "$(GAME_TITLE);$(GAME_SUBTITLE1);$(GAME_SUBTITLE2)" -g LCDT 2K $(GAME_TITLE)
 
 # Linking
 link: $(OFILES)
@@ -81,7 +82,7 @@ $(OBJDIR)%.o: $(SRCDIR)%.c
 
 # Converting .png files to ASM with grit
 $(SRCDIR)res/%.s: $(RESDIR)%.png
-	grit $< -gb -gB16 -fts -p -o$(basename $@)
+	grit $< -gb -gB16 -gT! -fts -fh -o$(basename $@)
 	mv $(basename $@).h $(INCLDIR)res/
 
 # Assembling (works only for resources at the moment)
