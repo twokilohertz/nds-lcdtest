@@ -25,7 +25,7 @@ int main(void)
     // Initialise background for displaying test patterns
     int PATTERN_BGID = bgInit(3, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
 
-    iprintf("Press A to cycle test patterns\nPress X to swap screens\nPress START to exit.");
+    iprintf("Press A to cycle test patterns\nPress X to swap screens\nPress START to exit");
 
     cycle_pattern(PATTERN_BGID); // Display first pattern (pattern 0 in patterns.c)
 
